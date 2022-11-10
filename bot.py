@@ -341,16 +341,22 @@ def callback_inline(call):
 			bot.message_handler(content_types=['text'])
 def allmessage(message):
 	if message.text == '❌ Выйти':
+		print('work')
 		exit(message)
 	if message.text == '⏩ Далее':
+		print('work')
 		buy(message)
 	if message.text == '⚡ Профиль':
+		print('work')
 		profile(message)
 	if message.text == '💸 Купить':
+		print('work')
 		sell(message)
 	if message.text == '🤑 Продать':
+		print('work')
 		sell(message)
 	if message.text == '❤ Мои продажи':
+		print('work')
 		mysell(message)
 
 bot.infinity_polling()
