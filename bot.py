@@ -340,10 +340,7 @@ def callback_inline(call):
 			bot.register_next_step_handler(msg, delete)
 			bot.message_handler(content_types=['text'])
 		if call.data == 'check':
-			with sqlite3.connect('db.db') as db:
-				cursor = db.cursor()
-
-				cursor.execute("SELECT * FROM vape")
+			pass
 def allmessage(message):
 	if message.text == '❌ Выйти':
 		exit(message)
