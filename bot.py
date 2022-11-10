@@ -339,8 +339,6 @@ def callback_inline(call):
 
 			bot.register_next_step_handler(msg, delete)
 			bot.message_handler(content_types=['text'])
-		if call.data == 'check':
-			pass
 def allmessage(message):
 	if message.text == '❌ Выйти':
 		exit(message)
