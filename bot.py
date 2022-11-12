@@ -80,12 +80,17 @@ def send_welcome(message):
 			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
 			bot.register_next_step_handler(msg, database)
 
+
 		else:
+			
 			bot.send_message(message.chat.id, f"""
 Привет {message.chat.username}❤
 
-Сейчас бот не популярен и на версии 1.0, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
-				""", reply_markup=markup1)
+Сейчас бот не популярен и на версии 1.0.1, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
+			""", reply_markup=markup1)
+
+
+
 			print('none')
 			
 
@@ -267,13 +272,18 @@ def buy(message):
 		info2 = cursor.execute('SELECT * FROM username WHERE ID = ?', (info[1],))
 		info2 = cursor.fetchone()
 
+		
+
+
 		bot.send_message(message.chat.id,  f"""
-{info[0]}
+	{info[0]}
 
-В городе {info2[2]}
+	В городе {info2[2]}
 
-Написать человеку - @{info[3]}
-""", reply_markup=markup)
+	Написать человеку - @{info[3]}
+
+	Product ID - {info[2]}
+	""", reply_markup=markup)
 
 def sel(message):
 	if message.text == '/cancellation':
