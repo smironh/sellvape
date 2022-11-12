@@ -1,15 +1,7 @@
-#very beta mother fucker
-#1.0 - когда можно будет выкладывать без картинки✅
-#1.0 - когда можно будет мне чекать людей по нику и id⛔
-#1.0 - когда можно будет смотреть подики✅
-#1.0 - когда можно будет переходить к челу в лс✅
+#1.0.1
 
-#ВЫКЛАДЫВАТЬ И ПИАРИТЬ ТОЛЬКО С 1.0
-#КОГДА ЭТИ 4 ПАРАМЕТРА БУДУТ СДЕЛАНЫ
-
-
-#1.1 - когда можно будет мне банить людей⛔
-#1.1 - Жалабы, удаление товара⛔
+#1.1 - когда можно будет мне банить людей⛔ +-
+#1.1 - Жалабы, удаление товара✅
 
 #1.2-1.5 - фикс багов
 
@@ -39,8 +31,9 @@ def send_welcome(message):
 	btn2 = types.KeyboardButton("🤑 Продать")
 	btn3 = types.KeyboardButton("💸 Купить")
 	btn4 = types.KeyboardButton("❤ Мои продажи")
+	btn5 = types.KeyboardButton("⛔ Пожаловаться")
 
-	markup1.add(btn1, btn2, btn3, btn4)
+	markup1.add(btn1, btn2, btn3, btn5)
 
 	with sqlite3.connect('db.db') as db:
 		
@@ -67,7 +60,7 @@ def send_welcome(message):
 		""")
 		info = cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
 		if not info.fetchone():
-			markup = types.ReplyKeyboardMarkup()
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 			button1 = types.KeyboardButton("Москва")
 			button2 = types.KeyboardButton('Пермь')
 			button3 = types.KeyboardButton('Екатеринбург')
@@ -81,7 +74,7 @@ def send_welcome(message):
 			bot.reply_to(message, f"""
 Привет {message.chat.username} ты тут я вижу впервые❤ 
 
-Сейчас бот не популярен и на версии 1.0, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
+Сейчас бот не популярен и на версии 1.0.1, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
 			""")
 
 			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
@@ -121,6 +114,46 @@ def sell(message):
 		bot.reply_to(message, 'Сейчас вам поочередно будут предлогатся товары')
 		buy(message)
 
+@bot.message_handler(commands=['sells'])
+def sells(message):
+	command = message.text.split(maxsplit=1)[1]
+	adm = str(admin)
+	chat_id = str(message.chat.id)
+
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+	else:
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+
+			cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
+			city = cursor.fetchone()
+
+			for i in cursor.execute("SELECT * FROM vape WHERE ID=?", (command, )).fetchall():
+				bot.reply_to(message, f"""
+{i[0]}
+
+Город {city[2]}
+
+Написать - {i[3]}
+
+Product Id - {i[2]}""")
+
+@bot.message_handler(commands=['del'])
+def delet(message):
+	command = message.text.split(maxsplit=1)[1]
+
+	adm = str(admin)
+	chat_id = str(message.chat.id)
+
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+	else:
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+			cursor.execute('DELETE FROM vape WHERE productID=?', (command, ))
+
+			bot.reply_to(message, 'Успешно удалено')
 
 @bot.message_handler(commands=['mysell'])
 def mysell(message):
@@ -339,24 +372,33 @@ def callback_inline(call):
 
 			bot.register_next_step_handler(msg, delete)
 			bot.message_handler(content_types=['text'])
+		if call.data == 'complain':
+			complain(call.message)
+
+def complain(message):
+	msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите проблему')
+
+	bot.register_next_step_handler(msg, sendme)
+
+def sendme(message):
+	bot.send_message(admin, message.text)
+	bot.reply_to(message, 'Ваша жалаба будет расмотрена')
+
 @bot.message_handler()
 def allmessage(message):
 	if message.text == '❌ Выйти':
 		exit(message)
 	if message.text == '⏩ Далее':
-
 		buy(message)
 	if message.text == '⚡ Профиль':
-		
 		profile(message)
 	if message.text == '💸 Купить':
-		
 		sell(message)
 	if message.text == '🤑 Продать':
-		
 		sell(message)
 	if message.text == '❤ Мои продажи':
-		
 		mysell(message)
+	if message.text == '⛔ Пожаловаться':
+		complain(message)
 
 bot.infinity_polling()
