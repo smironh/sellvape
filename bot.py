@@ -252,7 +252,7 @@ def profile(message):
 
 
 def buy(message):
-	markup = types.ReplyKeyboardMarkup()
+	markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 	button1 = types.KeyboardButton("⏩ Далее")
 	button2 = types.KeyboardButton('❌ Выйти')
 	markup.add(button1, button2)
@@ -376,13 +376,25 @@ def callback_inline(call):
 			complain(call.message)
 
 def complain(message):
-	msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите проблему')
+	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+	btn1 = types.KeyboardButton("Не в наличии")
+	btn2 = types.KeyboardButton("Имя профиля не найдено")
+	btn3 = types.KeyboardButton("Не верный город")
+	btn4 = types.KeyboardButton("Кидала")
+
+	markup1.add(btn1, btn2, btn3, btn4)
+
+	msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите или укажите проблему\n\nЕсли хотите отменить напишите /cancellation', reply_markup=markup1)
 
 	bot.register_next_step_handler(msg, sendme)
 
 def sendme(message):
-	bot.send_message(admin, message.text)
-	bot.reply_to(message, 'Ваша жалаба будет расмотрена')
+	if message.text == '/cancellation':
+		bot.reply_to(message, 'Вы отменили жалобу')
+	else:
+		bot.send_message(admin, message.text)
+		bot.reply_to(message, 'Ваша жалоба будет расмотрена')
 
 @bot.message_handler()
 def allmessage(message):
