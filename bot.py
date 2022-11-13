@@ -41,14 +41,14 @@ def send_welcome(message):
 
 		cursor.execute("""
 			CREATE TABLE IF NOT EXISTS username(
-				ID TEXT,
+				ID INT,
 				name TEXT,
 				city TEXT
 			)""")
 		cursor.execute("""
 			CREATE TABLE IF NOT EXISTS vape(
 				product TEXT,
-				ID TEXT,
+				ID INT,
 				productID INTEGER PRIMARY KEY,
 				seller TEXT
 			)
@@ -74,7 +74,9 @@ def send_welcome(message):
 			bot.reply_to(message, f"""
 Привет {message.chat.username} ты тут я вижу впервые❤ 
 
-Сейчас бот не популярен и на версии 1.0.1, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
+Бот на стадии разработки, могут быть баги
+		
+NEW Добавлено использование жалоб! Если человек изменил ник, уже продал товар или кинул то добавилась кнопка ⛔ Пожаловаться
 			""")
 
 			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
@@ -273,17 +275,19 @@ def buy(message):
 		info2 = cursor.fetchone()
 
 		
+		try:
 
+			bot.send_message(message.chat.id,  f"""
+		{info[0]}
 
-		bot.send_message(message.chat.id,  f"""
-	{info[0]}
+		В городе {info2[2]}
 
-	В городе {info2[2]}
+		Написать человеку - @{info[3]}
 
-	Написать человеку - @{info[3]}
-
-	Product ID - {info[2]}
-	""", reply_markup=markup)
+		Product ID - {info[2]}
+		""", reply_markup=markup)
+		except:
+			bot.reply_to(message, 'Произошла ошибка!')
 
 def sel(message):
 	if message.text == '/cancellation':
