@@ -402,7 +402,7 @@ def database(message):
 	btn4 = types.KeyboardButton("❤ Мои продажи")
 	btn5 = types.KeyboardButton("⛔ Пожаловаться")
 
-	markup1.add(btn1, btn2, btn3, btn5)
+	markup1.add(btn1, btn2, btn3, btn4, btn5)
 	with sqlite3.connect('db.db') as db:
 		
 		cursor = db.cursor()
