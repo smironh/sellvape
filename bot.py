@@ -266,13 +266,25 @@ def seckret(message):
 				with open("db.db","rb") as file:
 					f=file.read()
 				bot.send_document(config.chat_id, f,"db.db")
+			if command == 'info':
+				cursor.execute('SELECT COUNT(ID) FROM username')
+				rang = cursor.fetchone()
+
+				cursor.execute('SELECT COUNT(product) FROM vape')
+				vapes = cursor.fetchone()
+
+				cursor.execute('SELECT COUNT(ID) FROM userban')
+				bans = cursor.fetchone()
+
+				bot.reply_to(message, f'''
+{rang[0]} - Пользователей
+{vapes[0]} - Объявлений
+{bans[0]} - Пользователей в бане
+''')
 			else:
-				if message.chat.id != message.chat.id:
-					bot.reply_to(message, 'Пошел нахуй')
-				else:
-					cursor.execute('SELECT * FROM username WHERE ID=?', (command, ))
-					user=  cursor.fetchone()
-					bot.reply_to(message, f'''
+				cursor.execute('SELECT * FROM username WHERE ID=?', (command, ))
+				user=  cursor.fetchone()
+				bot.reply_to(message, f'''
 Чел - @{user[1]}
 
 Посмотреть продажи - /sells {command}
