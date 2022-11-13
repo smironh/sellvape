@@ -268,10 +268,10 @@ def buy(message):
 		cursor = db.cursor()
 
 
-		info = cursor.execute('SELECT * FROM vape ORDER BY RANDOM() LIMIT 1;')
+		cursor.execute('SELECT * FROM vape ORDER BY RANDOM() LIMIT 1;')
 		info = cursor.fetchone()
 
-		info2 = cursor.execute('SELECT * FROM username WHERE ID = ?', (info[1],))
+		cursor.execute('SELECT * FROM username WHERE ID = ?', (info[1],))
 		info2 = cursor.fetchone()
 
 		
@@ -287,7 +287,7 @@ def buy(message):
 		Product ID - {info[2]}
 		""", reply_markup=markup)
 		except:
-			bot.reply_to(message, 'Произошла ошибка!')
+			bot.reply_to(message, f'Произошла ошибка! ProductID - {info[2]} Для жалабы')
 
 def sel(message):
 	if message.text == '/cancellation':
