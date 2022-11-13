@@ -412,7 +412,10 @@ def database(message):
 		]
 		
 		cursor.executemany("INSERT INTO username(ID, name, city)VALUEs(?, ?, ?)", data)
+		info = cursor.fetchone()
 
+
+		bot.send_message(admin, f"@{message.from_user.username} Зарегался\n\n{message.from_user.id}")
 		bot.reply_to(message, 'Успешно', reply_markup=markup1)
 
 
