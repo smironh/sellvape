@@ -1,7 +1,4 @@
-#1.0.1
-
-#1.1 - когда можно будет мне банить людей⛔ +-
-#1.1 - Жалабы, удаление товара✅
+#1.1 Встречайте!
 
 #1.2-1.5 - фикс багов
 
@@ -33,7 +30,7 @@ def send_welcome(message):
 	btn4 = types.KeyboardButton("❤ Мои продажи")
 	btn5 = types.KeyboardButton("⛔ Пожаловаться")
 
-	markup1.add(btn1, btn2, btn3, btn5)
+	markup1.add(btn1, btn2, btn3, btn4, btn5)
 
 	with sqlite3.connect('db.db') as db:
 		
@@ -74,7 +71,7 @@ def send_welcome(message):
 			bot.reply_to(message, f"""
 Привет {message.chat.username} ты тут я вижу впервые❤ 
 
-Бот на стадии разработки, могут быть баги
+Рекомендуем не менять имя во время тово как продаете вейп
 		
 NEW Добавлено использование жалоб! Если человек изменил ник, уже продал товар или кинул то добавилась кнопка ⛔ Пожаловаться
 			""")
@@ -84,12 +81,24 @@ NEW Добавлено использование жалоб! Если чело�
 
 
 		else:
-			
-			bot.send_message(message.chat.id, f"""
-Привет {message.chat.username}❤
+			cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+			usrban = cursor.fetchone()
 
-Сейчас бот не популярен и на версии 1.0.1, но если его распростронять то в будет очень много покупателей(следовательно и продавцов)
-			""", reply_markup=markup1)
+			if usrban is None:
+
+				bot.send_message(message.chat.id, f"""
+	Привет {message.chat.username}❤
+
+	Рекомендуем не менять имя во время тово как продаете вейп
+
+	NEW Добавлено использование жалоб! Если человек изменил ник, уже продал товар или кинул то добавилась кнопка ⛔ Пожаловаться
+				""", reply_markup=markup1)
+			else:
+				bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
 
 
 
@@ -113,13 +122,27 @@ def help(message):
 
 @bot.message_handler(commands=['sell', 'buy'])
 def sell(message):
-	if message.text == '/sell' or message.text == '🤑 Продать':
-		msg = bot.reply_to(message, 'Напишите о товаре(название, цену, состояние и тд)\n/cancellation чтобы отменить')
-		bot.register_next_step_handler(msg, sel)
+	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
 
-	if message.text == '/buy' or message.text == '💸 Купить':
-		bot.reply_to(message, 'Сейчас вам поочередно будут предлогатся товары')
-		buy(message)
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
+		if usrban is None:
+
+			if message.text == '/sell' or message.text == '🤑 Продать':
+				msg = bot.reply_to(message, 'Напишите о товаре(название, цену, состояние и тд)\n/cancellation чтобы отменить')
+				bot.register_next_step_handler(msg, sel)
+
+			if message.text == '/buy' or message.text == '💸 Купить':
+				bot.reply_to(message, 'Сейчас вам поочередно будут предлогатся товары')
+				buy(message)
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+			''')
+
 
 @bot.message_handler(commands=['sells'])
 def sells(message):
@@ -167,66 +190,93 @@ def mysell(message):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
 
-		cursor.execute("SELECT * FROM vape WHERE ID=?", (message.chat.id, ))
-		info = cursor.fetchone()
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
 
-		rang = cursor.execute('SELECT COUNT(*) FROM vape WHERE ID=?', (message.chat.id, ))
+		if usrban is None:
 
-		cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
-		city = cursor.fetchone()
+			cursor.execute("SELECT * FROM vape WHERE ID=?", (message.chat.id, ))
+			info = cursor.fetchone()
 
-		markup = types.InlineKeyboardMarkup()
-		button1 = types.InlineKeyboardButton("Удалить", callback_data='Del')
-		markup.add(button1)
+			rang = cursor.execute('SELECT COUNT(*) FROM vape WHERE ID=?', (message.chat.id, ))
 
-		for i in cursor.execute("SELECT * FROM vape WHERE ID=?", (message.chat.id, )).fetchall():
-			bot.reply_to(message, f"""
-{i[0]}
+			cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
+			city = cursor.fetchone()
 
-Город {city[2]}
+			markup = types.InlineKeyboardMarkup()
+			button1 = types.InlineKeyboardButton("Удалить", callback_data='Del')
+			markup.add(button1)
 
-Написать - {i[3]}
+			for i in cursor.execute("SELECT * FROM vape WHERE ID=?", (message.chat.id, )).fetchall():
+				bot.reply_to(message, f"""
+	{i[0]}
 
-Product Id - {i[2]}
-""")
-		bot.send_message(message.chat.id, 'Хотите удалить 1 продажу?', reply_markup=markup)
+	Город {city[2]}
+
+	Написать - {i[3]}
+
+	Product Id - {i[2]}
+	""")
+			bot.send_message(message.chat.id, 'Хотите удалить 1 продажу?', reply_markup=markup)
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
+
 
 @bot.message_handler(commands=['ban'])
 def ban(message):
 	command = message.text.split(maxsplit=1)[1]
-	print(message.text)
-	with sqlite3.connect('db.db') as db:
-		cursor = db.cursor()
+	adm = str(admin)
+	chat_id = str(message.chat.id)
 
-		cursor.execute('INSERT INTO userban(ID)VALUEs(?)', (command, ))
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+
+	else:
+
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+
+			cursor.execute('INSERT INTO userban(ID)VALUEs(?)', (command, ))
+			bot.reply_to(message, f'Вы успешно забанили юзера - {command}')
 
 @bot.message_handler(commands=['1'])
 def seckret(message):
-
-	markup = types.InlineKeyboardMarkup()
-	button1 = types.InlineKeyboardButton("Посмотреть объявления", callback_data='check')
-	button2 = types.InlineKeyboardButton("Забанить", callback_data='ban')
-	markup.add(button1, button2)
-
 	command = message.text.split(maxsplit=1)[1]
-	with sqlite3.connect('db.db') as db:
-		cursor = db.cursor()
-		if command == 'db' or command is None:
-			with open("db.db","rb") as file:
-				f=file.read()
-			bot.send_document(config.chat_id, f,"db.db")
-		else:
-			if message.chat.id != message.chat.id:
-				bot.reply_to(message, 'Пошел нахуй')
-			else:
-				cursor.execute('SELECT * FROM username WHERE ID=?', (command, ))
-				user=  cursor.fetchone()
-				bot.reply_to(message, f'''
-		Чел - @{user[1]}
+	
+	adm = str(admin)
+	chat_id = str(message.chat.id)
 
-		Посмотреть продажи - /sells {command}
-		Забанить - /ban {command}
-		''', reply_markup=markup)
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+	else:
+
+		markup = types.InlineKeyboardMarkup()
+		button1 = types.InlineKeyboardButton("Посмотреть объявления", callback_data='check')
+		button2 = types.InlineKeyboardButton("Забанить", callback_data='ban')
+		markup.add(button1, button2)
+
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+			if command == 'db' or command is None:
+				with open("db.db","rb") as file:
+					f=file.read()
+				bot.send_document(config.chat_id, f,"db.db")
+			else:
+				if message.chat.id != message.chat.id:
+					bot.reply_to(message, 'Пошел нахуй')
+				else:
+					cursor.execute('SELECT * FROM username WHERE ID=?', (command, ))
+					user=  cursor.fetchone()
+					bot.reply_to(message, f'''
+			Чел - @{user[1]}
+
+			Посмотреть продажи - /sells {command}
+			Забанить - /ban {command}
+			''', reply_markup=markup)
 
 
 @bot.message_handler(commands=['profile'])
@@ -234,75 +284,109 @@ def profile(message):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
 
-		markup = types.InlineKeyboardMarkup()
-		button1 = types.InlineKeyboardButton("Изменить город", callback_data='changecity')
-		markup.add(button1)
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
 
-		cursor.execute("SELECT city FROM username WHERE ID=?", (message.chat.id, ))
-		result = cursor.fetchone()
-		
-		cursor.execute('SELECT COUNT(product) FROM vape WHERE ID=?', (message.chat.id, ))
-		rang = cursor.fetchone()
-
-		bot.reply_to(message , f"""
-Ваш ник - {message.chat.username}
-Ваш ID - {message.chat.id}
-Город - {result[0]}
-
-Сейчас в продаже - {rang[0]}
-
-Продаж - Soon
-Куплено - Soon
-
-Рейтинг продавца - Soon
-""", reply_markup=markup)
-
-
-def buy(message):
-	markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-	button1 = types.KeyboardButton("⏩ Далее")
-	button2 = types.KeyboardButton('❌ Выйти')
-	markup.add(button1, button2)
-
-	with sqlite3.connect('db.db') as db:
-		cursor = db.cursor()
-
-
-		cursor.execute('SELECT * FROM vape ORDER BY RANDOM() LIMIT 1;')
-		info = cursor.fetchone()
-
-		cursor.execute('SELECT * FROM username WHERE ID = ?', (info[1],))
-		info2 = cursor.fetchone()
-
-		
-		try:
-
-			bot.send_message(message.chat.id,  f"""
-		{info[0]}
-
-		В городе {info2[2]}
-
-		Написать человеку - @{info[3]}
-
-		Product ID - {info[2]}
-		""", reply_markup=markup)
-		except:
-			bot.reply_to(message, f'Произошла ошибка! ProductID - {info[2]} Для жалабы')
-
-def sel(message):
-	if message.text == '/cancellation':
-		bot.reply_to(message, 'Вы отменили добавление товара')
-	else:
-		with sqlite3.connect('db.db') as db:
+		if usrban is None:
 			cursor = db.cursor()
 
-			data = [
-				(message.text, message.chat.id, message.chat.username)
-			]
+			markup = types.InlineKeyboardMarkup()
+			button1 = types.InlineKeyboardButton("Изменить данные", callback_data='changecity')
+			markup.add(button1)
 
-			cursor.executemany('INSERT INTO vape(product, ID, seller)VALUEs(?, ?, ?)', data)
+			cursor.execute("SELECT city FROM username WHERE ID=?", (message.chat.id, ))
+			result = cursor.fetchone()
+			
+			cursor.execute('SELECT COUNT(product) FROM vape WHERE ID=?', (message.chat.id, ))
+			rang = cursor.fetchone()
 
-			bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут')
+			bot.reply_to(message , f"""
+	Ваш ник - {message.chat.username}
+	Ваш ID - {message.chat.id}
+	Город - {result[0]}
+
+	Сейчас в продаже - {rang[0]}
+
+	Продаж - Soon
+	Куплено - Soon
+
+	Рейтинг продавца - Soon
+	""", reply_markup=markup)
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
+
+def buy(message):
+	with sqlite3.connect('db.db') as db:
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
+		if usrban is None:
+			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+			button1 = types.KeyboardButton("⏩ Далее")
+			button2 = types.KeyboardButton('❌ Выйти')
+			markup.add(button1, button2)
+
+			with sqlite3.connect('db.db') as db:
+				cursor = db.cursor()
+
+
+				cursor.execute('SELECT * FROM vape ORDER BY RANDOM() LIMIT 1;')
+				info = cursor.fetchone()
+
+				cursor.execute('SELECT * FROM username WHERE ID = ?', (info[1],))
+				info2 = cursor.fetchone()
+
+				
+				try:
+
+					bot.send_message(message.chat.id,  f"""
+				{info[0]}
+
+				В городе {info2[2]}
+
+				Написать человеку - @{info[3]}
+
+				Product ID - {info[2]}
+				""", reply_markup=markup)
+				except:
+					bot.reply_to(message, f'Произошла ошибка! ProductID - {info[2]} Для жалабы')
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
+
+
+def sel(message):
+	with sqlite3.connect('db.db') as db:
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
+		if usrban is None:
+
+			if message.text == '/cancellation':
+				bot.reply_to(message, 'Вы отменили добавление товара')
+			else:
+				with sqlite3.connect('db.db') as db:
+					cursor = db.cursor()
+
+					data = [
+						(message.text, message.chat.id, message.chat.username)
+					]
+
+					cursor.executemany('INSERT INTO vape(product, ID, seller)VALUEs(?, ?, ?)', data)
+
+					bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут')
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
+
 
 def database(message):
 	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -311,8 +395,9 @@ def database(message):
 	btn2 = types.KeyboardButton("🤑 Продать")
 	btn3 = types.KeyboardButton("💸 Купить")
 	btn4 = types.KeyboardButton("❤ Мои продажи")
+	btn5 = types.KeyboardButton("⛔ Пожаловаться")
 
-	markup1.add(btn1, btn2, btn3, btn4)
+	markup1.add(btn1, btn2, btn3, btn5)
 	with sqlite3.connect('db.db') as db:
 		
 		cursor = db.cursor()
@@ -329,7 +414,7 @@ def database(message):
 def change(message):
 
 	if message.text == '/cancellation':
-		bot.reply_to(message, 'Вы отменили изменение города')
+		bot.reply_to(message, 'Вы отменили изменение Профиля')
 	else:
 		with sqlite3.connect('db.db') as db:
 			cursor = db.cursor()
@@ -349,12 +434,12 @@ def delete(message):
 		cursor.execute("SELECT * from vape WHERE productID= ?", (message.text, ))
 		chat_id = str(message.chat.id )
 		text = str(cursor.fetchone()[1])
-		print(f'{chat_id}, {text}')
+		print(f'{text}')
 
 
 		try:
 			if chat_id == text:
-				cursor.execute('DELETE FROM vape WHERE ID=? AND productID=?', (message.chat.id, message.text))
+				cursor.execute('DELETE FROM vape WHERE ID=? productID=?', (message.chat.id, message.text))
 
 				bot.reply_to(message, f'Вы успешно удалили товар {message.text}')
 			if chat_id != text:
@@ -365,7 +450,7 @@ def delete(message):
 
 				bot.reply_to(message, f'Вы не можете удалить этот товар тк он не ваш!', reply_markup=markup)
 		except sqlite3.Error:
-			bot.reply_to(message, 'Такого объявления не существует!')
+			bot.reply_to(message, 'Удаление пока не доступно!')
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -390,18 +475,33 @@ def callback_inline(call):
 			complain(call.message)
 
 def complain(message):
-	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
 
-	btn1 = types.KeyboardButton("Не в наличии")
-	btn2 = types.KeyboardButton("Имя профиля не найдено")
-	btn3 = types.KeyboardButton("Не верный город")
-	btn4 = types.KeyboardButton("Кидала")
+		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+		usrban = cursor.fetchone()
 
-	markup1.add(btn1, btn2, btn3, btn4)
+		if usrban is None:
+			markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-	msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите или укажите проблему\n\nЕсли хотите отменить напишите /cancellation', reply_markup=markup1)
+			btn1 = types.KeyboardButton("Не в наличии")
+			btn2 = types.KeyboardButton("Имя профиля не найдено")
+			btn3 = types.KeyboardButton("Не верный город")
+			btn4 = types.KeyboardButton("Кидала")
 
-	bot.register_next_step_handler(msg, sendme)
+			markup1.add(btn1, btn2, btn3, btn4)
+
+			msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите или укажите проблему\n\nЕсли хотите отменить напишите /cancellation', reply_markup=markup1)
+
+			bot.register_next_step_handler(msg, sendme)
+
+		else:
+			bot.reply_to(message, '''
+Опссссс, походу вы решили порекламится в моем боте
+
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+''')
+
 
 def sendme(message):
 	if message.text == '/cancellation':
