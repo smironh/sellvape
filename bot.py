@@ -321,6 +321,8 @@ def profile(message):
 
 def buy(message):
 	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
+
 		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
 		usrban = cursor.fetchone()
 		if usrban is None:
