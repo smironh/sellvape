@@ -363,6 +363,8 @@ def buy(message):
 
 def sel(message):
 	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
+
 		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
 		usrban = cursor.fetchone()
 		if usrban is None:
@@ -527,4 +529,6 @@ def allmessage(message):
 	if message.text == '⛔ Пожаловаться':
 		complain(message)
 
-bot.infinity_polling()
+
+if __name__ == '__main__':	
+	bot.infinity_polling()
