@@ -123,6 +123,8 @@ def help(message):
 
 @bot.message_handler(commands=['sell', 'buy'])
 def sell(message):
+	a = telebot.types.ReplyKeyboardRemove()
+
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
 
@@ -131,7 +133,7 @@ def sell(message):
 		if usrban is None:
 
 			if message.text == '/sell' or message.text == '🤑 Продать':
-				msg = bot.reply_to(message, 'Напишите о товаре(название, цену, состояние и тд)\n/cancellation чтобы отменить')
+				msg = bot.reply_to(message, 'Напишите о товаре(название, цену, состояние и тд)\n/cancellation чтобы отменить', reply_markup=a)
 				bot.register_next_step_handler(msg, sel)
 
 			if message.text == '/buy' or message.text == '💸 Купить':
@@ -361,13 +363,13 @@ def buy(message):
 				try:
 
 					bot.send_message(message.chat.id,  f"""
-				{info[0]}
+{info[0]}
 
-				В городе {info2[2]}
+В городе {info2[2]}
 
-				Написать человеку - @{info[3]}
+Написать человеку - @{info[3]}
 
-				Product ID - {info[2]}
+Product ID - {info[2]}
 				""", reply_markup=markup)
 				except:
 					bot.reply_to(message, f'Произошла ошибка! ProductID - {info[2]} Для жалабы')
@@ -380,6 +382,16 @@ def buy(message):
 
 
 def sel(message):
+	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+	btn1 = types.KeyboardButton("⚡ Профиль")
+	btn2 = types.KeyboardButton("🤑 Продать")
+	btn3 = types.KeyboardButton("💸 Купить")
+	btn4 = types.KeyboardButton("❤ Мои продажи")
+	btn5 = types.KeyboardButton("⛔ Пожаловаться")
+
+	markup1.add(btn1, btn2, btn3, btn4, btn5)
+	
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
 
@@ -388,7 +400,7 @@ def sel(message):
 		if usrban is None:
 
 			if message.text == '/cancellation':
-				bot.reply_to(message, 'Вы отменили добавление товара')
+				bot.reply_to(message, 'Вы отменили добавление товара', reply_markup=markup1)
 			else:
 				with sqlite3.connect('db.db') as db:
 					cursor = db.cursor()
