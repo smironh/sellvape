@@ -273,10 +273,10 @@ def seckret(message):
 					cursor.execute('SELECT * FROM username WHERE ID=?', (command, ))
 					user=  cursor.fetchone()
 					bot.reply_to(message, f'''
-			Чел - @{user[1]}
+Чел - @{user[1]}
 
-			Посмотреть продажи - /sells {command}
-			Забанить - /ban {command}
+Посмотреть продажи - /sells {command}
+Забанить - /ban {command}
 			''', reply_markup=markup)
 
 
@@ -328,9 +328,12 @@ def buy(message):
 		usrban = cursor.fetchone()
 		if usrban is None:
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
 			button1 = types.KeyboardButton("⏩ Далее")
 			button2 = types.KeyboardButton('❌ Выйти')
-			markup.add(button1, button2)
+			button3 = types.KeyboardButton("⛔ Пожаловаться")
+			
+			markup.add(button1, button2, button3)
 
 			with sqlite3.connect('db.db') as db:
 				cursor = db.cursor()
@@ -490,16 +493,20 @@ def complain(message):
 		usrban = cursor.fetchone()
 
 		if usrban is None:
-			markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+			a = telebot.types.ReplyKeyboardRemove()
 
-			btn1 = types.KeyboardButton("Не в наличии")
-			btn2 = types.KeyboardButton("Имя профиля не найдено")
-			btn3 = types.KeyboardButton("Не верный город")
-			btn4 = types.KeyboardButton("Кидала")
+			markup2 = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-			markup1.add(btn1, btn2, btn3, btn4)
+			btn1 = types.KeyboardButton("⚡ Профиль")
+			btn2 = types.KeyboardButton("🤑 Продать")
+			btn3 = types.KeyboardButton("💸 Купить")
+			btn4 = types.KeyboardButton("❤ Мои продажи")
+			btn5 = types.KeyboardButton("⛔ Пожаловаться")
 
-			msg = bot.reply_to(message, 'Напишите продукт айди объявления и опишите или укажите проблему\n\nЕсли хотите отменить напишите /cancellation', reply_markup=markup1)
+			markup2.add(btn1, btn2, btn3, btn4, btn5)
+
+
+			msg = bot.reply_to(message, 'Опишите проблему ГЛАВНОЕ НАПИШИТЕ ProductID\n\nЕсли хотите отменить напишите /cancellation', reply_markup=a)
 
 			bot.register_next_step_handler(msg, sendme)
 
@@ -512,11 +519,21 @@ def complain(message):
 
 
 def sendme(message):
+	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+	btn1 = types.KeyboardButton("⚡ Профиль")
+	btn2 = types.KeyboardButton("🤑 Продать")
+	btn3 = types.KeyboardButton("💸 Купить")
+	btn4 = types.KeyboardButton("❤ Мои продажи")
+	btn5 = types.KeyboardButton("⛔ Пожаловаться")
+
+	markup1.add(btn1, btn2, btn3, btn4, btn5)
+
 	if message.text == '/cancellation':
-		bot.reply_to(message, 'Вы отменили жалобу')
+		bot.reply_to(message, 'Вы отменили жалобу', reply_markup=markup1)
 	else:
-		bot.send_message(admin, message.text)
-		bot.reply_to(message, 'Ваша жалоба будет расмотрена')
+		bot.send_message(admin, f"{message.text}\n\n")
+		bot.reply_to(message, 'Ваша жалоба будет расмотрена', reply_markup=markup1)
 
 @bot.message_handler()
 def allmessage(message):
@@ -538,3 +555,4 @@ def allmessage(message):
 
 if __name__ == '__main__':	
 	bot.infinity_polling()
+	
