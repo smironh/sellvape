@@ -55,8 +55,13 @@ def send_welcome(message):
 				ID INT
 			)
 		""")
-		info = cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
-		if not info.fetchone():
+		cursor.execute("SELECT * FROM username WHERE ID=?", (message.chat.id, ))
+		info = cursor.fetchone()
+		print(info)
+
+		if info is None:
+
+			print('yeah')
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 			button1 = types.KeyboardButton("Москва")
 			button2 = types.KeyboardButton('Пермь')
@@ -81,6 +86,7 @@ NEW Добавлено использование жалоб! Если чело�
 
 
 		else:
+			print('none')
 			cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
 			usrban = cursor.fetchone()
 
@@ -99,11 +105,6 @@ NEW Добавлено использование жалоб! Если чело�
 
 Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
 ''')
-
-
-
-			print('none')
-			
 
 @bot.message_handler(commands=['help'])
 def help(message):
