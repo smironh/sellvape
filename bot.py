@@ -1,4 +1,4 @@
-#1.1 Встречайте!
+#1.2 Встречайте!
 
 #1.2-1.5 - фикс багов
 
@@ -78,7 +78,7 @@ def send_welcome(message):
 
 Рекомендуем не менять имя во время тово как продаете вейп
 		
-NEW 1.1.1 
+NEW 1.2
 			""")
 
 			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
@@ -97,7 +97,7 @@ NEW 1.1.1
 
 	Рекомендуем не менять имя во время тово как продаете вейп
 
-	NEW 1.1.1 
+	NEW 1.2 
 				""", reply_markup=markup1)
 			else:
 				bot.reply_to(message, '''
@@ -255,6 +255,24 @@ def ban(message):
 
 			cursor.execute('INSERT INTO userban(ID)VALUEs(?)', (command, ))
 			bot.reply_to(message, f'Вы успешно забанили юзера - {command}')
+
+@bot.message_handler(commands=['unban'])
+def unban(message):
+	command = message.text.split(maxsplit=1)[1]
+	adm = str(admin)
+	chat_id = str(message.chat.id) # думаю это связано с силой земли
+
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+
+	else:
+
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+
+			cursor.execute('DELETE FROM userban WHERE ID=?', (command, ))
+			bot.reply_to(message, f'Вы разбанили забанили юзера - {command}')
+
 
 @bot.message_handler(commands=['1'])
 def seckret(message):
@@ -436,7 +454,7 @@ def sel(message):
 						bot.reply_to(message, 'ВОВОВОВВО Не так быстро! Ты можешь оставить ссылку на картинку!')
 					else:
 
-						bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут')
+						bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут', reply_markup=markup1)
 		else:
 			bot.reply_to(message, '''
 Опссссс, походу вы решили порекламится в моем боте
