@@ -226,12 +226,15 @@ def sendreklam(message):
 def startsend(message):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
+		no = 0
+		yes = 0 
 		for i in cursor.execute("SELECT ID FROM username").fetchall():
 			try:
 				bot.send_message(i[0], message.text)
-				bot.send_message(admin, f"{i} - успешно отправлен")	
-			except:
-				bot.send_message(admin, f"{i} - не отправлен")		
+				yes += 1
+			except:no += 1
+		bot.send_message(admin, f'{yes} - Успешно отправилось\n\n{no} - Ошибка')
+
 
 @bot.message_handler(commands=['mysell'])
 def mysell(message):
