@@ -565,7 +565,17 @@ def change(message):
 
 
 def exit(message):
-	bot.reply_to(message, 'Вы вышли')
+	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+	btn1 = types.KeyboardButton("⚡ Профиль")
+	btn2 = types.KeyboardButton("🤑 Продать")
+	btn3 = types.KeyboardButton("💸 Купить")
+	btn4 = types.KeyboardButton("❤ Мои продажи")
+	btn5 = types.KeyboardButton("⛔ Пожаловаться")
+
+	markup1.add(btn1, btn2, btn3, btn4, btn5)
+
+	bot.reply_to(message, 'Вы вышли', reply_markup=markup1)
 
 	send_welcome(message)
 def delete(message):
