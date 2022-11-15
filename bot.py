@@ -15,13 +15,24 @@ import random
 import config
 import time
 
+import models
+from models import *
 
 bot = telebot.TeleBot(config.TOKEN)
 
 admin = config.chat_id
+ref_link = 'https://telegram.me/{}?start={}'
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+
+	user_id = message.chat.id
+	splited = message.text.split()
+	if not Users.user_exists(user_id):
+		Users.create_user(user_id)
+		if len(splited) == 2:
+			Users.increase_ref_count(splited[1])
+
 	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
 	btn1 = types.KeyboardButton("⚡ Профиль")
@@ -60,6 +71,7 @@ def send_welcome(message):
 		print(info)
 
 		if info is None:
+
 
 			print('yeah')
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -145,6 +157,17 @@ def sell(message):
 	else:
 		send_welcome(message)
 
+@bot.message_handler(commands=['ref'])
+def get_my_ref(message):
+    bot_name = bot.get_me().username
+    bot.reply_to(message, text=ref_link.format(bot_name, message.chat.id))
+
+
+@bot.message_handler(commands=['ref_count'])
+def get_my_refs(message):
+    count = Users.get_ref_count(message.chat.id)
+    bot.reply_to(message, text=f'Count: {count}')
+
 
 @bot.message_handler(commands=['sells'])
 def sells(message):
@@ -186,6 +209,29 @@ def delet(message):
 			cursor.execute('DELETE FROM vape WHERE productID=?', (command, ))
 
 			bot.reply_to(message, 'Успешно удалено')
+
+@bot.message_handler(commands=['send'])
+def sendreklam(message):
+	adm = str(admin)
+	chat_id = str(message.chat.id)
+
+	if chat_id != adm:
+		bot.reply_to(message, 'Съебался в страхе пока не уебал')
+	else:
+
+		msg = bot.reply_to(message, 'Напишите сообщение которое хотите отправить')
+		bot.register_next_step_handler(msg, startsend)
+
+
+def startsend(message):
+	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
+		for i in cursor.execute("SELECT ID FROM username").fetchall():
+			try:
+				bot.send_message(i, message.text)
+				bot.send_message(admin, f"{i} - успешно отправлен")	
+			except:
+				bot.send_message(admin, f"{i} - не отправлен")		
 
 @bot.message_handler(commands=['mysell'])
 def mysell(message):
@@ -336,6 +382,9 @@ def location (message):
 def profile(message):
 	if ifnot(message) == True:
 
+		#bot_name = bot.get_me().username
+		#count = Users.get_ref_count(message.chat.id)
+
 		with sqlite3.connect('db.db') as db:
 			cursor = db.cursor()
 
@@ -355,6 +404,9 @@ def profile(message):
 				cursor.execute('SELECT COUNT(product) FROM vape WHERE ID=?', (message.chat.id, ))
 				rang = cursor.fetchone()
 
+				#count = Users.get_ref_count(message.chat.id)
+				#bot_name = bot.get_me().username
+
 				bot.reply_to(message , f"""
 Ваш ник - {message.chat.username}
 Ваш ID - {message.chat.id}
@@ -362,11 +414,8 @@ def profile(message):
 
 Сейчас в продаже - {rang[0]}
 
-Продаж - Soon
-Куплено - Soon
+""", reply_markup=markup)
 
-Рейтинг продавца - Soon
-		""", reply_markup=markup)
 			else:
 				bot.reply_to(message, '''
 Опссссс, походу вы решили порекламится в моем боте
