@@ -65,23 +65,15 @@ def send_welcome(message):
 			markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 			button1 = types.KeyboardButton("Москва")
 			button2 = types.KeyboardButton('Пермь')
-			button3 = types.KeyboardButton('Екатеринбург')
-			button4 = types.KeyboardButton('Санк-Питербург')
+			button3 = types.KeyboardButton('ЕКБ')
+			button4 = types.KeyboardButton('СПБ')
 
 			markup.add(button1, button2, button3, button4)
 
 			
 			#####
 
-			bot.reply_to(message, f"""
-Привет {message.chat.username} ты тут я вижу впервые❤ 
-
-Рекомендуем не менять имя во время тово как продаете вейп
-		
-NEW 1.2
-			""")
-
-			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
+			msg = bot.reply_to(message, f'Привет {message.chat.username} ты тут я вижу впервые❤\n\nДля начало введите в каком городе вы живете!', reply_markup=markup)
 			bot.register_next_step_handler(msg, database)
 
 
@@ -219,22 +211,31 @@ def mysell(message):
 				button1 = types.InlineKeyboardButton("Удалить", callback_data='Del')
 				markup.add(button1)
 
+				b = 0
+
 				for i in cursor.execute("SELECT * FROM vape WHERE ID=?", (message.chat.id, )).fetchall():
 					bot.reply_to(message, f"""
-		{i[0]}
+{i[0]}
 
-		Город {city[2]}
+Город {city[2]}
 
-		Написать - @{i[3]}
+Написать - @{i[3]}
 
-		Product Id - {i[2]}
-		""")
-				bot.send_message(message.chat.id, 'Хотите удалить 1 продажу?', reply_markup=markup)
+Product Id - {i[2]}
+""")
+					
+					b+= 1
+				if b == 0:
+					bot.reply_to(message, 'У вас нет объявлений!')
+				else:
+					bot.send_message(message.chat.id, 'Хотите удалить объявления?', reply_markup=markup)
+
+
 			else:
 				bot.reply_to(message, '''
-	Опссссс, походу вы решили порекламится в моем боте
+Опссссс, походу вы решили порекламится в моем боте
 
-	Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
 	''')
 	else:
 		send_welcome(message)			
@@ -321,6 +322,15 @@ def seckret(message):
 Забанить - /ban {command}
 			''', reply_markup=markup)
 
+
+@bot.message_handler(content_types=['location'])
+def location (message):
+	if message.location is not None:
+		print(message.location)
+		print(message)
+	else:
+		print(message)
+		print(message.location)
 
 @bot.message_handler(commands=['profile'])
 def profile(message):
