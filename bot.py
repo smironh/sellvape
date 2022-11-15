@@ -16,7 +16,7 @@ import config
 import time
 
 import models
-from models import *
+#from models import *
 
 bot = telebot.TeleBot(config.TOKEN)
 
