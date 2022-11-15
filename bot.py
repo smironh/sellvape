@@ -78,7 +78,7 @@ def send_welcome(message):
 
 Рекомендуем не менять имя во время тово как продаете вейп
 		
-NEW Добавлено использование жалоб! Если человек изменил ник, уже продал товар или кинул то добавилась кнопка ⛔ Пожаловаться
+NEW 1.1.1 
 			""")
 
 			msg = bot.reply_to(message, 'Для начало введите в каком городе вы живете!', reply_markup=markup)
@@ -97,7 +97,7 @@ NEW Добавлено использование жалоб! Если чело�
 
 	Рекомендуем не менять имя во время тово как продаете вейп
 
-	NEW Добавлено использование жалоб! Если человек изменил ник, уже продал товар или кинул то добавилась кнопка ⛔ Пожаловаться
+	NEW 1.1.1 
 				""", reply_markup=markup1)
 			else:
 				bot.reply_to(message, '''
@@ -225,7 +225,7 @@ def mysell(message):
 
 		Город {city[2]}
 
-		Написать - {i[3]}
+		Написать - @{i[3]}
 
 		Product Id - {i[2]}
 		""")
@@ -243,7 +243,7 @@ def mysell(message):
 def ban(message):
 	command = message.text.split(maxsplit=1)[1]
 	adm = str(admin)
-	chat_id = str(message.chat.id)
+	chat_id = str(message.chat.id) # думаю это связано с силой земли
 
 	if chat_id != adm:
 		bot.reply_to(message, 'Съебался в страхе пока не уебал')
@@ -350,7 +350,7 @@ def profile(message):
 
 def buy(message):
 	if ifnot(message) == True:
-		bot.reply_to(message, 'Сейчас вам поочередно будут предлогатся товары')
+		
 
 		with sqlite3.connect('db.db') as db:
 			cursor = db.cursor()
@@ -431,8 +431,12 @@ def sel(message):
 					]
 
 					cursor.executemany('INSERT INTO vape(product, ID, seller)VALUEs(?, ?, ?)', data)
+					print(message.content_type)
+					if message.content_type == 'photo':
+						bot.reply_to(message, 'ВОВОВОВВО Не так быстро! Ты можешь оставить ссылку на картинку!')
+					else:
 
-					bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут')
+						bot.reply_to(message, 'Вы успешно выложили свой товар! Ждите пока вам напишут')
 		else:
 			bot.reply_to(message, '''
 Опссссс, походу вы решили порекламится в моем боте
@@ -531,37 +535,42 @@ def callback_inline(call):
 			complain(call.message)
 
 def complain(message):
-	with sqlite3.connect('db.db') as db:
-		cursor = db.cursor()
 
-		cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
-		usrban = cursor.fetchone()
+	if ifnot == True:
 
-		if usrban is None:
-			a = telebot.types.ReplyKeyboardRemove()
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
 
-			markup2 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+			cursor.execute('SELECT * from userban WHERE ID=?', (message.chat.id, ))
+			usrban = cursor.fetchone()
 
-			btn1 = types.KeyboardButton("⚡ Профиль")
-			btn2 = types.KeyboardButton("🤑 Продать")
-			btn3 = types.KeyboardButton("💸 Купить")
-			btn4 = types.KeyboardButton("❤ Мои продажи")
-			btn5 = types.KeyboardButton("⛔ Пожаловаться")
+			if usrban is None:
+				a = telebot.types.ReplyKeyboardRemove()
 
-			markup2.add(btn1, btn2, btn3, btn4, btn5)
+				markup2 = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+				btn1 = types.KeyboardButton("⚡ Профиль")
+				btn2 = types.KeyboardButton("🤑 Продать")
+				btn3 = types.KeyboardButton("💸 Купить")
+				btn4 = types.KeyboardButton("❤ Мои продажи")
+				btn5 = types.KeyboardButton("⛔ Пожаловаться")
+
+				markup2.add(btn1, btn2, btn3, btn4, btn5)
 
 
-			msg = bot.reply_to(message, 'Опишите проблему ГЛАВНОЕ НАПИШИТЕ ProductID\n\nЕсли хотите отменить напишите /cancellation', reply_markup=a)
+				msg = bot.reply_to(message, 'Опишите проблему ГЛАВНОЕ НАПИШИТЕ ProductID\n\nЕсли хотите отменить напишите /cancellation', reply_markup=a)
 
-			bot.register_next_step_handler(msg, sendme)
+				bot.register_next_step_handler(msg, sendme)
 
-		else:
-			bot.reply_to(message, '''
-Опссссс, походу вы решили порекламится в моем боте
+			else:
+				bot.reply_to(message, '''
+	Опссссс, походу вы решили порекламится в моем боте
 
-Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
-''')
+	Если хочешь еще отхватить пизды то свяжись со мной - @YeahAlin321
+	''')
 
+	else:
+		send_welcome()
 
 def sendme(message):
 	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
