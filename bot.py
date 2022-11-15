@@ -5,8 +5,6 @@
 #1.6 - когда можно будет выкладывать картинки⛔
 #1.6 - статус, продаж, куплено, рейтинг продвца и покупателя⛔
 
-#
-
 #1.7 - Реф система⛔
 
 import telebot
@@ -511,26 +509,23 @@ def exit(message):
 def delete(message):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
-		cursor.execute("SELECT * from vape WHERE productID= ?", (message.text, ))
-		chat_id = str(message.chat.id )
-		text = str(cursor.fetchone()[1])
+		cursor.execute("SELECT * from vape WHERE ID= ?", (message.chat.id, ))
+		chat_id = (message.chat.id )
+		text = (cursor.fetchone()[1])
 		print(f'{text}')
+		print(chat_id)
+
+		if chat_id == text:
+			cursor.execute('DELETE FROM vape WHERE ID=? AND productID=?', (message.chat.id, message.text))
+
+			bot.reply_to(message, f'Вы успешно удалили товар {message.text}')
+		if chat_id != text:
+			markup = types.InlineKeyboardMarkup()
+			button1 = types.InlineKeyboardButton("Указать другой", callback_data='Del')
+			markup.add(button1)
 
 
-		try:
-			if chat_id == text:
-				cursor.execute('DELETE FROM vape WHERE ID=? productID=?', (message.chat.id, message.text))
-
-				bot.reply_to(message, f'Вы успешно удалили товар {message.text}')
-			if chat_id != text:
-				markup = types.InlineKeyboardMarkup()
-				button1 = types.InlineKeyboardButton("Указать другой", callback_data='Del')
-				markup.add(button1)
-
-
-				bot.reply_to(message, f'Вы не можете удалить этот товар тк он не ваш!', reply_markup=markup)
-		except sqlite3.Error:
-			bot.reply_to(message, 'Удаление пока не доступно!')
+			bot.reply_to(message, f'Вы не можете удалить этот товар тк он не ваш!', reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda call: True)
