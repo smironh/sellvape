@@ -15,7 +15,7 @@ import random
 import config
 import time
 
-import models
+#import models
 #from models import *
 
 bot = telebot.TeleBot(config.TOKEN)
