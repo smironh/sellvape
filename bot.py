@@ -228,7 +228,7 @@ def startsend(message):
 		cursor = db.cursor()
 		for i in cursor.execute("SELECT ID FROM username").fetchall():
 			try:
-				bot.send_message(i, message.text)
+				bot.send_message(i[0], message.text)
 				bot.send_message(admin, f"{i} - успешно отправлен")	
 			except:
 				bot.send_message(admin, f"{i} - не отправлен")		
