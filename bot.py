@@ -26,13 +26,6 @@ ref_link = 'https://telegram.me/{}?start={}'
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
 
-	user_id = message.chat.id
-	splited = message.text.split()
-	if not Users.user_exists(user_id):
-		Users.create_user(user_id)
-		if len(splited) == 2:
-			Users.increase_ref_count(splited[1])
-
 	markup1 = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
 	btn1 = types.KeyboardButton("⚡ Профиль")
