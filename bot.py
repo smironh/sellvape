@@ -83,9 +83,9 @@ CREATE TABLE IF NOT EXISTS products(
 			await message.reply("Привет! Я тебя вижу в первые! Напиши или укажи свой Город!", reply_markup=markup)
 			
 		else:
-			await message.answer('Привет! Встречайте 1.0.1!', reply_markup=markup2)
+			await message.answer('Привет! Встречайте 1.1!', reply_markup=markup2)
 
-@dp.message_handler(commands=['send'])
+@dp.message_handler(commands=['send'], content_types=['text', 'photo'])
 async def send(message: types.Message):
 	Id = str(message.chat.id)
 	myid = str(1020329422)
@@ -93,9 +93,10 @@ async def send(message: types.Message):
 		await message.reply('У вас нет доступа к этой команде')
 	else:
 		await Send.msg.set()
-		await message.reply('Введи сообщение которое хочешь отправить')
+		await message.reply('Введи сообщение которое хочешь отправить \n /close для отмены')
 
-@dp.message_handler(state=Send.msg)
+
+@dp.message_handler(state=Send.msg, content_types=['text', 'photo'])
 async def send_messag(message: types.Message, state: FSMContext):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
@@ -106,13 +107,25 @@ async def send_messag(message: types.Message, state: FSMContext):
 		y = 0
 		n = 0
 
-		for i in ides:
-			try:
-				await bot.send_message(i[0], message.text)
-				y += 1
-			except:
-				n += 1
-		await message.reply(f'Успешно доставлено!\n{y} - доставлено\n{n} - Не доставлено')
+		if message.content_type == 'text':
+			if message.text == '/close':
+				pass
+			else:
+				for i in ides:
+					try:
+						await bot.send_message(i[0], message.text)
+						y += 1
+					except:
+						n += 1
+				await message.reply(f'Успешно доставлено!\n{y} - доставлено\n{n} - Не доставлено')
+		if message.content_type == 'photo':
+			for i in ides:
+				try:
+					await bot.send_photo(i[0], photo=message.photo[0].file_id, caption=message.caption)
+					y += 1
+				except:
+					n += 1
+			await message.reply(f'Успешно доставлено!\n{y} - доставлено\n{n} - Не доставлено')
 
 		await state.finish()
 
@@ -139,6 +152,9 @@ async def allmessage(message: types.Message):
 	elif message.text == 'Профиль':
 		await profile(message)
 	elif message.text == 'Купить':
+		markup2 = ReplyKeyboardRemove()
+
+		await message.answer('Сейчас вам будут присылатся объявления!', reply_markup=markup2)
 		await buy(message)
 
 @dp.message_handler(state=Form.city)
