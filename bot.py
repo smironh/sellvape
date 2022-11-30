@@ -29,6 +29,8 @@ bot = Bot(token = cfg.TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
+class Send(StatesGroup):
+	msg = State()
 class Form(StatesGroup):
 	city = State()
 class vape(StatesGroup):
@@ -69,7 +71,8 @@ CREATE TABLE IF NOT EXISTS products(
 	photo TEXT DEFAULT ('NONE'),
 	caption TEXT,
 	productID INTEGER PRIMARY KEY,
-	city TEXT
+	city TEXT,
+	fromuser TEXT
 )
 ''')
 		cursor.execute('SELECT ID FROM user WHERE ID=?', (message.chat.id, ))
@@ -81,6 +84,37 @@ CREATE TABLE IF NOT EXISTS products(
 			
 		else:
 			await message.answer('Привет! Встречайте 1.0.1!', reply_markup=markup2)
+
+@dp.message_handler(commands=['send'])
+async def send(message: types.Message):
+	Id = str(message.chat.id)
+	myid = str(1020329422)
+	if myid != Id:
+		await message.reply('У вас нет доступа к этой команде')
+	else:
+		await Send.msg.set()
+		await message.reply('Введи сообщение которое хочешь отправить')
+
+@dp.message_handler(state=Send.msg)
+async def send_messag(message: types.Message, state: FSMContext):
+	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
+
+		cursor.execute('SELECT ID FROM user')
+		ides = cursor.fetchall()
+
+		y = 0
+		n = 0
+
+		for i in ides:
+			try:
+				await bot.send_message(i[0], message.text)
+				y += 1
+			except:
+				n += 1
+		await message.reply(f'Успешно доставлено!\n{y} - доставлено\n{n} - Не доставлено')
+
+		await state.finish()
 
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
@@ -144,10 +178,10 @@ async def process_vape(message: types.Message, state=FSMContext):
 			city = cursor.execute('SELECT * FROM user WHERE ID=?', (message.chat.id, )).fetchone()[2]
 
 			if message.content_type == 'photo':
-				cursor.execute('INSERT INTO products(photo, caption, city, ID) VALUES(?, ?, ?, ?)', (message.photo[0].file_id, message.caption, city, message.chat.id, ))
+				cursor.execute('INSERT INTO products(photo, caption, city, ID, fromuser) VALUES(?, ?, ?, ?, ?)', (message.photo[0].file_id, message.caption, city, message.chat.id, message.chat.username, ))
 				await message.reply('Вы успешно выложили товар, ждите пока вам напишут', reply_markup=markup2)
 			if message.content_type == 'text':
-				cursor.execute('INSERT INTO products(caption, city, ID) VALUES(?, ?, ?)', (message.text, city, message.chat.id))
+				cursor.execute('INSERT INTO products(caption, city, ID, fromuser) VALUES(?, ?, ?, ?)', (message.text, city, message.chat.id, message.chat.username, ))
 				await message.reply('Вы успешно выложили товар, ждите пока вам напишут', reply_markup=markup2)
 	await state.finish()
 
@@ -206,9 +240,7 @@ async def process_callback_del1(callback_query: types.CallbackQuery):
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
 
-
 		for vape in cursor.execute('SELECT * FROM products WHERE ID=?', (callback_query.message.chat.id, )).fetchall():
-			
 			if vape[1] == 'NONE':
 				await callback_query.message.answer(f'''
 {vape[2]}
@@ -217,9 +249,8 @@ async def process_callback_del1(callback_query: types.CallbackQuery):
 productId: {vape[3]}
 	''', reply_markup=markup)
 			else:
-				await bot.send_photo(callback_query.message.chat.id, photo = vape[1], caption=f'''
+				await bot.send_photo(callback_query.message.chat.id, photo = f'{vape[1]}', caption=f'''
 {vape[2]}
-
 
 {vape[4]}
 productId: {vape[3]}
@@ -248,9 +279,8 @@ async def delete(callback_query: types.CallbackQuery):
 async def buy(message: types.Message):
 	btn1 = InlineKeyboardButton('Далее', callback_data='next')
 	btn2 = InlineKeyboardButton('Выйти', callback_data='back')
-	btn3 = InlineKeyboardButton('Пожаловатся', callback_data='not')
 
-	markup = InlineKeyboardMarkup().add(btn1, btn2, btn3)
+	markup = InlineKeyboardMarkup().add(btn1, btn2)
 
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
@@ -261,6 +291,7 @@ async def buy(message: types.Message):
 			await bot.send_message(message.chat.id, f'''
 {vape[2]}
 
+Написать - @{vape[5]}
 {vape[4]}
 productId : {vape[3]}
 ''', reply_markup=markup)
@@ -268,6 +299,8 @@ productId : {vape[3]}
 			await bot.send_photo(message.chat.id, photo = vape[1], caption=f''' 
 {vape[2]}
 
+
+Написать - @{vape[5]}
 {vape[4]}
 ProductId : {vape[3]}
 ''', reply_markup=markup)
