@@ -85,6 +85,26 @@ CREATE TABLE IF NOT EXISTS products(
 		else:
 			await message.answer('Привет! Встречайте 1.1!', reply_markup=markup2)
 
+@dp.message_handler(commands=['db'])
+async def database(message: types.Message):
+	print('1')
+	await bot.send_document(message.chat.id, open('db.db', 'rb'))
+@dp.message_handler(commands=['infoId'])
+async def infoId(message: types.Message):
+	ID = message.text.split()
+	with sqlite3.connect('db.db') as db:
+		cursor = db.cursor()
+		vape = cursor.execute('SELECT * FROM products WHERE ProductId=?', (ID[1], )).fetchone()
+
+		await message.reply(f'''
+{vape[2]}
+
+
+Написать - @{vape[5]}
+{vape[4]}
+ProductId : {vape[3]}		
+''')
+
 @dp.message_handler(commands=['send'], content_types=['text', 'photo'])
 async def send(message: types.Message):
 	Id = str(message.chat.id)
