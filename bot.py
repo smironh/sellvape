@@ -2,7 +2,7 @@
 #удаление товара в профиле✔
 #удаление товара для меня❌
 #бан пользователя❌
-#/send❌
+#/send✔
 
 #1.0.1✔
 
@@ -19,6 +19,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ParseMode
 from aiogram.utils import executor
+from aiogram.utils.callback_data import CallbackData
 
 from aiogram.utils.exceptions import (MessageToEditNotFound, MessageCantBeEdited, MessageCantBeDeleted,
     MessageToDeleteNotFound)
@@ -83,12 +84,17 @@ CREATE TABLE IF NOT EXISTS products(
 			await message.reply("Привет! Я тебя вижу в первые! Напиши или укажи свой Город!", reply_markup=markup)
 			
 		else:
-			await message.answer('Привет! Встречайте 1.1!', reply_markup=markup2)
+			await message.answer('Привет! Встречайте 1.2!', reply_markup=markup2)
 
 @dp.message_handler(commands=['db'])
 async def database(message: types.Message):
-	print('1')
-	await bot.send_document(message.chat.id, open('db.db', 'rb'))
+	Id = str(message.chat.id)
+	myid = str(1020329422)
+	if Id == myid:
+		print('1')
+		await bot.send_document(message.chat.id, open('db.db', 'rb'))
+	else:
+		pass
 @dp.message_handler(commands=['infoId'])
 async def infoId(message: types.Message):
 	ID = message.text.split()
@@ -148,6 +154,23 @@ async def send_messag(message: types.Message, state: FSMContext):
 			await message.reply(f'Успешно доставлено!\n{y} - доставлено\n{n} - Не доставлено')
 
 		await state.finish()
+@dp.message_handler(commands=['del'])
+async def deletforme(message: types.Message):
+	if message.chat.id == 1020329422:
+		try:
+			arr = message.text.split(' ')
+		except:
+			arr = message.caption.split(' ')
+		
+		with sqlite3.connect('db.db') as db:
+			cursor = db.cursor()
+
+			print(arr[-1])
+
+			cursor.execute('DELETE FROM products WHERE productID=?', (arr[-1], ))
+			await message.answer('Успешо!')
+	else:
+		pass
 
 @dp.message_handler(commands=['info'])
 async def info(message: types.Message):
@@ -268,15 +291,16 @@ async def process_callback_del1(callback_query: types.CallbackQuery):
 	await bot.answer_callback_query(callback_query.id)
 	await callback_query.message.delete()
 
-	btn = InlineKeyboardButton('Удалить', callback_data='delete')
-	btn2 = InlineKeyboardButton('Изменить', callback_data='not')
-	
-	markup = InlineKeyboardMarkup().add(btn, btn2)
-
 	with sqlite3.connect('db.db') as db:
 		cursor = db.cursor()
+		
 
 		for vape in cursor.execute('SELECT * FROM products WHERE ID=?', (callback_query.message.chat.id, )).fetchall():
+			btn = InlineKeyboardButton ('Удалить', callback_data=f"delete")
+			btn2 = InlineKeyboardButton('Изменить', callback_data='not')
+	
+			markup = InlineKeyboardMarkup().add(btn, btn2)
+			
 			if vape[1] == 'NONE':
 				await callback_query.message.answer(f'''
 {vape[2]}
@@ -304,9 +328,9 @@ async def delete(callback_query: types.CallbackQuery):
 		except:
 			arr = callback_query.message.caption.split(': ')
 		
-		#print(arr[1])
+		print(arr[-1])
 
-		cursor.execute('DELETE FROM products WHERE productID=?', (arr[1], ))
+		cursor.execute('DELETE FROM products WHERE productID=?', (arr[-1], ))
 		await callback_query.message.answer('Вы успешно удалили товар')
 
 		await callback_query.message.delete()
