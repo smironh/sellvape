@@ -1,2 +1,6 @@
+requests
+Pillow
 aiogram
-asyncio
+apscheduler
+logging
+glQiwiApi
